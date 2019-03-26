@@ -1,25 +1,57 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import axios from 'axios';
+import 'normalize.css';
 import './App.css';
+import Header from './block-elements/Header';
+import DragDrop from './DragDrop';
+import ImportUrl from './ImportUrl';
+import Editor from './Editor';
 
 class App extends Component {
-  render() {
+  fileIngress (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let firstFile = e.dataTransfer.files[0];
+
+    const reader = new FileReader();
+
+    reader.onabort = () => console.warn('File read aborted');
+    reader.onerror = (e) => console.error('File read error:', e);
+    reader.onload = () => {
+      this.setState({
+        file: reader.result
+      });
+    };
+
+    reader.readAsDataURL(firstFile);
+  }
+
+  async fileUrlIngress (url) {
+    // following url is a workaround for having a proper backend proxy. :-P
+    let res = await axios.get(`https://cors-anywhere.herokuapp.com/${url}`, {
+      responseType: 'arraybuffer'
+    });
+
+    this.setState({
+      file: new Buffer(res.data, 'binary').toString('base64')
+    });
+  }
+
+  render () {
+    const { file } = this.state || {};
+
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div className="application__container">
+        <Header />
+        {file ?
+          <Editor file={file} /> :
+          <div>
+            <ImportUrl onUrlEntry={this.fileUrlIngress.bind(this)} />
+            <DragDrop ondrop={this.fileIngress.bind(this)} />
+          </div>
+        }
+
       </div>
     );
   }
