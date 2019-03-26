@@ -28,8 +28,7 @@ class Editor extends Component {
     let rat = img.width / img.height,
         appendWidth = $canvas.width,
         appendHeight = appendWidth / rat;
-    console.log('rat', rat);
-    console.log('cropScale', cropScale);
+
     // FLIP!
     if (appendHeight > $canvas.height) {
         appendHeight = $canvas.height;
@@ -118,7 +117,6 @@ class Editor extends Component {
 
   rotate (amt) {
     let ctx = this.getCanvas(),
-        canvas = this.getCanvas(false),
         img = this.state.lastImageDrawn;
 
     this.setState({
